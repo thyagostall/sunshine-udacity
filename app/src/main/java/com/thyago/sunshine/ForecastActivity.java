@@ -1,11 +1,11 @@
 package com.thyago.sunshine;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class ForecastActivity extends AppCompatActivity {
+public class ForecastActivity extends Activity {
 
     private static final String LOG_TAG = ForecastActivity.class.getSimpleName();
 
