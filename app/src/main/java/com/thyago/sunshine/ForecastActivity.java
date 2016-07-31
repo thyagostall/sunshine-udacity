@@ -1,10 +1,13 @@
 package com.thyago.sunshine;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.Locale;
 
 public class ForecastActivity extends AppCompatActivity {
 
@@ -34,6 +37,14 @@ public class ForecastActivity extends AppCompatActivity {
             case R.id.action_settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.action_view_preferred_location:
+                String location = SunshinePrefs.getPreferredLocation();
+                Uri uri = Uri.parse(String.format(Locale.getDefault(), "geo:0,0?q=%s", location));
+                Intent map = new Intent(Intent.ACTION_VIEW, uri);
+                if (map.resolveActivity(getPackageManager()) != null) {
+                    startActivity(map);
+                }
                 return true;
         }
         return false;

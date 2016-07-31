@@ -71,13 +71,8 @@ public class ForecastFragment extends Fragment {
     }
 
     private void updateWeather() {
-        String postalCode = getPreferredPostalCode();
+        String postalCode = SunshinePrefs.getPreferredLocation();
         new ForecastWeatherTask().execute(postalCode);
-    }
-
-    private String getPreferredPostalCode() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        return prefs.getString(getString(R.string.pref_key_location), getString(R.string.pref_default_value_location));
     }
 
     private String getPreferredUnit() {
