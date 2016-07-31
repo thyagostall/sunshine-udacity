@@ -35,18 +35,30 @@ public class ForecastActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                openSettingsActivity();
                 return true;
             case R.id.action_view_preferred_location:
-                String location = SunshinePrefs.getPreferredLocation();
-                Uri uri = Uri.parse(String.format(Locale.getDefault(), "geo:0,0?q=%s", location));
-                Intent map = new Intent(Intent.ACTION_VIEW, uri);
-                if (map.resolveActivity(getPackageManager()) != null) {
-                    startActivity(map);
-                }
+                openPreferredLocationMap();
                 return true;
+            default:
+                return false;
         }
-        return false;
+    }
+
+    private void openSettingsActivity() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    private void openPreferredLocationMap() {
+        String location = SunshinePrefs.getPreferredLocation();
+        Uri uri = Uri.parse("geo:0,0")
+                .buildUpon()
+                .appendQueryParameter("q", location)
+                .build();
+        Intent map = new Intent(Intent.ACTION_VIEW, uri);
+        if (map.resolveActivity(getPackageManager()) != null) {
+            startActivity(map);
+        }
     }
 }
