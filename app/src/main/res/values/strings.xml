@@ -23,4 +23,5 @@
     <string name="pref_label_metric">Metric</string>
     <string name="pref_label_imperial">Imperial</string>
     <string name="preferred_location">Preferred Location</string>
+    <string name="share">Share</string>
 </resources>
