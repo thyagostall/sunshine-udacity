@@ -164,6 +164,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_location)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_unit)));
         }
 
         @Override

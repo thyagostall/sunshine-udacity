@@ -32,6 +32,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by thyago on 7/25/16.
@@ -50,6 +51,12 @@ public class ForecastFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_forecast_menu, menu);
     }
@@ -58,15 +65,24 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            String postalCode = getPreferredPostalCode();
-            new ForecastWeatherTask().execute(postalCode);
+            updateWeather();
         }
         return true;
     }
 
+    private void updateWeather() {
+        String postalCode = getPreferredPostalCode();
+        new ForecastWeatherTask().execute(postalCode);
+    }
+
     private String getPreferredPostalCode() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        return prefs.getString(getString(R.string.pref_key_location), "");
+        return prefs.getString(getString(R.string.pref_key_location), getString(R.string.pref_default_value_location));
+    }
+
+    private String getPreferredUnit() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return prefs.getString(getString(R.string.pref_key_unit), getString(R.string.pref_value_metric));
     }
 
     @Nullable
@@ -96,11 +112,27 @@ public class ForecastFragment extends Fragment {
         return shortenedDateFormat.format(time);
     }
 
-    private String formatHighLows(double high, double low) {
+    private double getMetric(double t) {
+        return t;
+    }
+
+    private double getImperial(double t) {
+        return (t * 1.8) + 32;
+    }
+
+    private String formatHighLows(double high, double low, String unit) {
+        if (getString(R.string.pref_value_metric).equals(unit)) {
+            high = getMetric(high);
+            low = getMetric(low);
+        } else {
+            high = getImperial(high);
+            low = getImperial(low);
+        }
+
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
-        return String.format("%d/%d", roundedHigh, roundedLow);
+        return String.format(Locale.getDefault(), "%d/%d", roundedHigh, roundedLow);
     }
 
     private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays) throws JSONException {
@@ -116,6 +148,8 @@ public class ForecastFragment extends Fragment {
 
         Date dayTime = new Date();
         String[] results = new String[numDays];
+        String unit = getPreferredUnit();
+
         for (int i = 0; i < jWeathers.length(); i++) {
             String day;
             String description;
@@ -134,7 +168,7 @@ public class ForecastFragment extends Fragment {
             double high = jTemperature.getDouble(TAG_MAX);
             double low = jTemperature.getDouble(TAG_MIN);
 
-            highAndLow = formatHighLows(high, low);
+            highAndLow = formatHighLows(high, low, unit);
             results[i] = day + " - " + description + " - " + highAndLow;
         }
 
