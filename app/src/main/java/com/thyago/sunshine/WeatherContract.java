@@ -2,8 +2,6 @@ package com.thyago.sunshine;
 
 import android.provider.BaseColumns;
 
-import java.sql.Time;
-
 /**
  * Created by thyago on 8/1/16.
  */
