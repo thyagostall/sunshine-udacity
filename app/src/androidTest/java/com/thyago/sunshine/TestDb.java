@@ -1,5 +1,6 @@
 package com.thyago.sunshine;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
@@ -27,7 +28,7 @@ public class TestDb extends AndroidTestCase {
         set.add(WeatherContract.WeatherEntry.TABLE_NAME);
 
         deleteTheDatabase();
-        SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
+        SQLiteDatabase db = new WeatherDbHelper(mContext).getWritableDatabase();
         assertTrue(db.isOpen());
 
         Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
@@ -42,7 +43,6 @@ public class TestDb extends AndroidTestCase {
         c = db.rawQuery("PRAGMA table_info(" + WeatherContract.LocationEntry.TABLE_NAME + ")", null);
         c.moveToFirst();
 
-        set.add(WeatherContract.LocationEntry._ID);
         set.add(WeatherContract.LocationEntry.COLUMN_CITY_NAME);
         set.add(WeatherContract.LocationEntry.COLUMN_COORD_LAT);
         set.add(WeatherContract.LocationEntry.COLUMN_COORD_LONG);
@@ -59,7 +59,19 @@ public class TestDb extends AndroidTestCase {
     }
 
     public void testLocationTable() {
+        ContentValues values = TestUtilities.createNorthPoleLocationValues();
 
+        deleteTheDatabase();
+        SQLiteDatabase db = new WeatherDbHelper(mContext).getWritableDatabase();
+        assertTrue(db.isOpen());
+
+        long insertedId = db.insertOrThrow(WeatherContract.LocationEntry.TABLE_NAME, null, values);
+        assertFalse("Error: The values were not inserted successfully into the database.", insertedId == -1);
+
+        Cursor c = db.query(WeatherContract.LocationEntry.TABLE_NAME, null, null, null, null, null, null);
+        c.moveToFirst();
+
+        TestUtilities.validateCurrentRecord("Error: The values were not inserted correctly.", c, values);
     }
 
     public void testWeatherTable() {

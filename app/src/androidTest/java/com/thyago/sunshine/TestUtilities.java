@@ -60,8 +60,8 @@ public class TestUtilities extends AndroidTestCase {
 
         values.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, TEST_LOCATION);
         values.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, "North Pole");
-        values.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, 64.7488);
-        values.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, -147.353);
+        values.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, 64.7488);
+        values.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, -147.353);
 
         return values;
     }
