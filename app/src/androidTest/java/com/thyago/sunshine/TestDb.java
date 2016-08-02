@@ -66,19 +66,38 @@ public class TestDb extends AndroidTestCase {
         assertTrue(db.isOpen());
 
         long insertedId = db.insertOrThrow(WeatherContract.LocationEntry.TABLE_NAME, null, values);
-        assertFalse("Error: The values were not inserted successfully into the database.", insertedId == -1);
+        assertFalse("Error: The location was not inserted successfully into the database.", insertedId == -1);
 
         Cursor c = db.query(WeatherContract.LocationEntry.TABLE_NAME, null, null, null, null, null, null);
         c.moveToFirst();
 
-        TestUtilities.validateCurrentRecord("Error: The values were not inserted correctly.", c, values);
+        TestUtilities.validateCurrentRecord("Error: The location was not validated.", c, values);
     }
 
     public void testWeatherTable() {
+        deleteTheDatabase();
 
+        long locationId = insertLocation();
+        ContentValues values = TestUtilities.createWeatherValues(locationId);
+
+        SQLiteDatabase db = new WeatherDbHelper(mContext).getWritableDatabase();
+        assertTrue(db.isOpen());
+
+        long insertedId = db.insertOrThrow(WeatherContract.WeatherEntry.TABLE_NAME, null, values);
+        assertFalse("Error: The weather entry was not inserted successfully into the database", insertedId == -1);
+
+        Cursor c = db.query(WeatherContract.WeatherEntry.TABLE_NAME, null, null, null, null, null, null);
+        c.moveToFirst();
+
+        TestUtilities.validateCurrentRecord("Error: The weather entry was not validated.", c, values);
     }
 
     public long insertLocation() {
-        return -1L;
+        ContentValues values = TestUtilities.createNorthPoleLocationValues();
+
+        deleteTheDatabase();
+        SQLiteDatabase db = new WeatherDbHelper(mContext).getWritableDatabase();
+
+        return db.insertOrThrow(WeatherContract.LocationEntry.TABLE_NAME, null, values);
     }
 }
