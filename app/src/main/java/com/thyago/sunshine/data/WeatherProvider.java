@@ -101,10 +101,26 @@ public class WeatherProvider extends ContentProvider {
                 result = getWeatherByLocationSetting(uri, projection, sortOrder);
                 break;
             case WEATHER:
-                result = null;
+                result = mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.WeatherEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
                 break;
             case LOCATION:
-                result = null;
+                result = mOpenHelper.getReadableDatabase().query(
+                        WeatherContract.LocationEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -120,9 +136,9 @@ public class WeatherProvider extends ContentProvider {
 
         switch (match) {
             case WEATHER_WITH_LOCATION_AND_DATE:
-                break;
+                return WeatherContract.WeatherEntry.CONTENT_ITEM_TYPE;
             case WEATHER_WITH_LOCATION:
-                break;
+                return WeatherContract.WeatherEntry.CONTENT_TYPE;
             case WEATHER:
                 return WeatherContract.WeatherEntry.CONTENT_TYPE;
             case LOCATION:
@@ -130,7 +146,6 @@ public class WeatherProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        return null;
     }
 
     @Nullable

@@ -72,7 +72,7 @@ public class TestUtilities extends AndroidTestCase {
         ContentValues values = TestUtilities.createNorthPoleLocationValues();
 
         long id;
-        id = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, values);
+        id = db.insertOrThrow(WeatherContract.LocationEntry.TABLE_NAME, null, values);
 
         assertTrue("Error: Failure to include data into the database.", id != -1);
 
