@@ -1,4 +1,4 @@
-package com.thyago.sunshine;
+package com.thyago.sunshine.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;

@@ -7,7 +7,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Locale;
+import com.thyago.sunshine.preferences.SettingsActivity;
+import com.thyago.sunshine.preferences.SunshinePrefs;
 
 public class ForecastActivity extends AppCompatActivity {
 

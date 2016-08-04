@@ -1,7 +1,10 @@
-package com.thyago.sunshine;
+package com.thyago.sunshine.preferences;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import com.thyago.sunshine.R;
+import com.thyago.sunshine.SunshineApplication;
 
 /**
  * Created by thyago on 7/31/16.

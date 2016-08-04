@@ -22,7 +22,7 @@
             android:name=".DetailActivity"
             android:label="@string/detail"/>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".preferences.SettingsActivity"
             android:label="@string/title_activity_settings" />
     </application>
 

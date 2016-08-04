@@ -1,4 +1,4 @@
-package com.thyago.sunshine;
+package com.thyago.sunshine.preferences;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
