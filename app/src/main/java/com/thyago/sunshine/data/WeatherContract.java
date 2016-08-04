@@ -14,8 +14,8 @@ public class WeatherContract {
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_WEATHER = "weather";
-    public static final String PATH_LOCATION = "location";
+    public static final String PATH_WEATHER = WeatherEntry.TABLE_NAME;
+    public static final String PATH_LOCATION = LocationEntry.TABLE_NAME;
 
     public static long normalizeDate(long dateValue) {
         return dateValue;
@@ -73,6 +73,13 @@ public class WeatherContract {
 
         public static Uri buildWeatherUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildWeatherLocation(String location) {
+
+            return CONTENT_URI.buildUpon()
+                    .appendPath(location)
+                    .build();
         }
     }
 }
