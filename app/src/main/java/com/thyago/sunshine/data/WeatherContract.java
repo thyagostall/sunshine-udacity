@@ -76,9 +76,15 @@ public class WeatherContract {
         }
 
         public static Uri buildWeatherLocation(String location) {
-
             return CONTENT_URI.buildUpon()
                     .appendPath(location)
+                    .build();
+        }
+
+        public static Uri buildWeatherLocationWithDate(String location, long date) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(location)
+                    .appendPath(String.valueOf(date))
                     .build();
         }
     }

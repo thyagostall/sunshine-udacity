@@ -75,7 +75,12 @@ public class WeatherProvider extends ContentProvider {
     }
 
     static UriMatcher buildUriMatcher() {
-        return null;
+        UriMatcher result = new UriMatcher(UriMatcher.NO_MATCH);
+        result.addURI(WeatherContract.CONTENT_AUTHORITY, WeatherContract.PATH_LOCATION, LOCATION);
+        result.addURI(WeatherContract.CONTENT_AUTHORITY, WeatherContract.PATH_WEATHER, WEATHER);
+        result.addURI(WeatherContract.CONTENT_AUTHORITY, WeatherContract.PATH_WEATHER + "/*", WEATHER_WITH_LOCATION);
+        result.addURI(WeatherContract.CONTENT_AUTHORITY, WeatherContract.PATH_WEATHER + "/*/#", WEATHER_WITH_LOCATION_AND_DATE);
+        return result;
     }
 
     @Override
