@@ -27,6 +27,14 @@ public class WeatherProvider extends ContentProvider {
 
     static {
         sWeatherByLocationSettingQueryBuilder = new SQLiteQueryBuilder();
+        sWeatherByLocationSettingQueryBuilder.setTables(
+                WeatherContract.WeatherEntry.TABLE_NAME + " INNER JOIN " +
+                        WeatherContract.LocationEntry.TABLE_NAME +
+                        " ON " + WeatherContract.WeatherEntry.TABLE_NAME +
+                        "." + WeatherContract.WeatherEntry.COLUMN_LOC_KEY +
+                        " = " + WeatherContract.LocationEntry.TABLE_NAME +
+                        "." + WeatherContract.LocationEntry._ID
+        );
     }
 
     private static String sLocationSettingSelection = WeatherContract.LocationEntry.TABLE_NAME + "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? ";
@@ -158,9 +166,17 @@ public class WeatherProvider extends ContentProvider {
         switch (match) {
             case WEATHER:
                 normalizeDate(values);
-                long id = db.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, values);
-                if (id > 0) {
-                    result = WeatherContract.WeatherEntry.buildWeatherUri(id);
+                long weatherId = db.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, values);
+                if (weatherId > 0) {
+                    result = WeatherContract.WeatherEntry.buildWeatherUri(weatherId);
+                } else {
+                    throw new SQLException("Failed to insert row into " + uri);
+                }
+                break;
+            case LOCATION:
+                long locationId = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, values);
+                if (locationId > 0) {
+                    result = WeatherContract.LocationEntry.buildWeatherUri(locationId);
                 } else {
                     throw new SQLException("Failed to insert row into " + uri);
                 }
