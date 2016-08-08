@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -261,14 +262,29 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
             values.add(item);
         }
 
+        ContentValues[] convertedValues = new ContentValues[values.size()];
         if (values.size() > 0) {
-            // Call bulk insert
+            mContext.getContentResolver().bulkInsert(
+                    WeatherContract.WeatherEntry.CONTENT_URI,
+                    values.toArray(convertedValues));
         }
 
         String sortingOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationSetting, System.currentTimeMillis());
 
-        // Display data stored right here
+        Cursor cursor = mContext.getContentResolver().query(
+                weatherForLocationUri,
+                null,
+                null,
+                null,
+                sortingOrder
+        );
+        values.clear();
+        while (cursor.moveToNext()) {
+            ContentValues item = new ContentValues();
+            DatabaseUtils.cursorRowToContentValues(cursor, item);
+            values.add(item);
+        }
 
         return convertContentValuesToUXFormat(values);
     }
