@@ -16,7 +16,12 @@ import android.test.AndroidTestCase;
  */
 public class TestProvider extends AndroidTestCase {
 
-    static private final int BULK_INSERT_RECORDS_TO_INSERT = 10;
+    private static final int BULK_INSERT_RECORDS_TO_INSERT = 10;
+
+    private static final String ADD_LOCATION_SETTING = "Sunnydale, CA";
+    private static final String ADD_LOCATION_CITY = "Sunnydale";
+    private static final double ADD_LOCATION_LAT = 34.425833;
+    private static final double ADD_LOCATION_LON = -119.714167;
 
     @Override
     protected void setUp() throws Exception {
@@ -309,6 +314,52 @@ public class TestProvider extends AndroidTestCase {
 
         cursor.close();
 
+    }
+
+    public void testAddLocation() {
+        mContext.getContentResolver().delete(
+                WeatherContract.LocationEntry.CONTENT_URI,
+                WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                new String[]{ADD_LOCATION_SETTING}
+        );
+
+        ForecastWeatherTask task = new ForecastWeatherTask(null);
+        long locationId = task.addLocation(ADD_LOCATION_SETTING, ADD_LOCATION_CITY, ADD_LOCATION_LAT, ADD_LOCATION_LON);
+
+        assertFalse("Error: addLocation returned an invalid ID on insert.", locationId == -1);
+
+        for (int i = 0; i < 2; i++) {
+            Cursor cursor = mContext.getContentResolver().query(
+                    WeatherContract.LocationEntry.CONTENT_URI,
+                    new String[]{
+                            WeatherContract.LocationEntry._ID,
+                            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+                            WeatherContract.LocationEntry.COLUMN_CITY_NAME,
+                            WeatherContract.LocationEntry.COLUMN_COORD_LAT,
+                            WeatherContract.LocationEntry.COLUMN_COORD_LONG,
+                    },
+                    WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                    new String[]{ADD_LOCATION_SETTING},
+                    null
+            );
+
+            if (cursor.moveToFirst()) {
+                assertEquals("Error: the queried value of locationId does not match the returned value", cursor.getLong(0), locationId);
+                assertEquals("Error: the queried value of location setting does not match the returned value", cursor.getString(1), ADD_LOCATION_SETTING);
+                assertEquals("Error: the queried value of location city does not match the returned value", cursor.getString(2), ADD_LOCATION_CITY);
+                assertEquals("Error: the queried value of location latitude does not match the returned value", cursor.getDouble(3), ADD_LOCATION_LAT);
+                assertEquals("Error: the queried value of location longitude does not match the returned value", cursor.getDouble(4), ADD_LOCATION_LON);
+            } else {
+                fail("Error: The constant ID used returned an empty cursor.");
+            }
+
+            assertFalse("Error: This query should only return one value.", cursor.moveToNext());
+
+            long newLocationId = task.addLocation(ADD_LOCATION_SETTING, ADD_LOCATION_CITY, ADD_LOCATION_LAT, ADD_LOCATION_LON);
+            assertEquals("Error: Inserting the same location should return the same id", locationId, newLocationId);
+        }
+
+        deleteAllRecordsFromProvider();
     }
 
 }

@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.thyago.sunshine.data.ForecastWeatherTask;
 import com.thyago.sunshine.preferences.SunshinePrefs;
 
 import java.util.ArrayList;

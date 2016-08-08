@@ -1,15 +1,19 @@
-package com.thyago.sunshine;
+package com.thyago.sunshine.data;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-import com.thyago.sunshine.data.WeatherContract;
+import com.thyago.sunshine.Constants;
+import com.thyago.sunshine.R;
+import com.thyago.sunshine.SunshineApplication;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,7 +34,7 @@ import java.util.Vector;
 /**
  * Created by thyago on 8/4/16.
  */
-class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
+public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
 
     private static final String LOG_TAG = ForecastWeatherTask.class.getSimpleName();
 
@@ -42,8 +46,46 @@ class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
         mAdapter = adapter;
     }
 
+    private String getAddLocationSelection() {
+        return WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND " +
+                WeatherContract.LocationEntry.COLUMN_CITY_NAME + " = ? AND " +
+                WeatherContract.LocationEntry.COLUMN_COORD_LAT + " = ? AND " +
+                WeatherContract.LocationEntry.COLUMN_COORD_LONG + " = ?";
+    }
+
+    private String[] getAddLocationSelectionArgs(String locationSetting, String cityName, double lat, double lon) {
+        return new String[] {
+                locationSetting,
+                cityName,
+                String.valueOf(lat),
+                String.valueOf(lon),
+        };
+    }
+
+    private long insertLocation(String locationSetting, String cityName, double lat, double lon) {
+        ContentValues values = new ContentValues();
+        values.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+        values.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, cityName);
+        values.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, lat);
+        values.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, lon);
+
+        Uri insertedUri = mContext.getContentResolver().insert(WeatherContract.LocationEntry.CONTENT_URI, values);
+        return ContentUris.parseId(insertedUri);
+    }
+
     long addLocation(String locationSetting, String cityName, double lat, double lon) {
-        return -1;
+        Cursor cursor = mContext.getContentResolver().query(
+                WeatherContract.LocationEntry.CONTENT_URI,
+                new String[]{WeatherContract.LocationEntry._ID},
+                getAddLocationSelection(),
+                getAddLocationSelectionArgs(locationSetting, cityName, lat, lon),
+                null
+        );
+        if (cursor.moveToNext()) {
+            return cursor.getLong(0);
+        } else {
+            return insertLocation(locationSetting, cityName, lat, lon);
+        }
     }
 
     String[] convertContentValuesToUXFormat(Vector<ContentValues> values) {
