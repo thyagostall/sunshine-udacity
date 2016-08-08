@@ -16,6 +16,8 @@ import android.test.AndroidTestCase;
  */
 public class TestProvider extends AndroidTestCase {
 
+    static private final int BULK_INSERT_RECORDS_TO_INSERT = 10;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -23,12 +25,7 @@ public class TestProvider extends AndroidTestCase {
     }
 
     private void deleteAllRecords() {
-        WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        db.delete(WeatherContract.WeatherEntry.TABLE_NAME, null, null);
-        db.delete(WeatherContract.LocationEntry.TABLE_NAME, null, null);
-        db.close();
+        deleteAllRecordsFromProvider();
     }
 
     public void testProviderRegistry() {
@@ -173,6 +170,145 @@ public class TestProvider extends AndroidTestCase {
         );
 
         TestUtilities.validateCursor("testInsertReadProvider. Error validating joined Weather and Location data for a specific date.", weatherCursor, weatherValues);
+    }
+
+    public void testUpdateLocation() {
+        ContentValues values = TestUtilities.createNorthPoleLocationValues();
+
+        Uri locationUri = mContext.getContentResolver().insert(WeatherContract.LocationEntry.CONTENT_URI, values);
+        long locationRowId = ContentUris.parseId(locationUri);
+
+        assertTrue(locationRowId != -1);
+
+        ContentValues updatedValues = new ContentValues(values);
+        updatedValues.put(WeatherContract.LocationEntry._ID, locationRowId);
+        updatedValues.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, "Santa's Village");
+
+        Cursor locationCursor = mContext.getContentResolver().query(WeatherContract.LocationEntry.CONTENT_URI, null, null, null, null);
+
+        TestUtilities.TestContentObserver tco = TestUtilities.getTestContentObserver();
+        locationCursor.registerContentObserver(tco);
+
+        int count = mContext.getContentResolver().update(
+                WeatherContract.LocationEntry.CONTENT_URI,
+                updatedValues,
+                WeatherContract.LocationEntry._ID + " = ?",
+                new String[]{Long.toString(locationRowId)}
+        );
+        assertEquals(count, 1);
+
+        tco.waitForNotificationOrFail();
+
+        locationCursor.unregisterContentObserver(tco);
+        locationCursor.close();
+
+        Cursor cursor = mContext.getContentResolver().query(
+                WeatherContract.LocationEntry.CONTENT_URI,
+                null,
+                WeatherContract.LocationEntry._ID + " = " + locationRowId,
+                null,
+                null
+        );
+
+        TestUtilities.validateCursor("testUpdateLocation. Error validating location entry update.", cursor, updatedValues);
+        cursor.close();
+    }
+
+    public void testDeleteRecords() {
+        testInsertReadProvider();
+
+        TestUtilities.TestContentObserver locationObserver = TestUtilities.getTestContentObserver();
+        mContext.getContentResolver().registerContentObserver(WeatherContract.LocationEntry.CONTENT_URI, true, locationObserver);
+
+        TestUtilities.TestContentObserver weatherObserver = TestUtilities.getTestContentObserver();
+        mContext.getContentResolver().registerContentObserver(WeatherContract.WeatherEntry.CONTENT_URI, true, weatherObserver);
+
+        deleteAllRecordsFromProvider();
+
+        locationObserver.waitForNotificationOrFail();
+        weatherObserver.waitForNotificationOrFail();
+
+        mContext.getContentResolver().unregisterContentObserver(locationObserver);
+        mContext.getContentResolver().unregisterContentObserver(weatherObserver);
+    }
+
+    private void deleteAllRecordsFromProvider() {
+        WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        db.delete(WeatherContract.WeatherEntry.TABLE_NAME, null, null);
+        db.delete(WeatherContract.LocationEntry.TABLE_NAME, null, null);
+        db.close();
+    }
+
+    static ContentValues[] createBulkInsertWeatherValues(long locationRowId) {
+        long currentTestDate = TestUtilities.TEST_DATE;
+        final long millisecondsInADay = 1000 * 60 * 60 * 24;
+        ContentValues[] result = new ContentValues[BULK_INSERT_RECORDS_TO_INSERT];
+
+        for (int i = 0; i < BULK_INSERT_RECORDS_TO_INSERT; i++) {
+            ContentValues weatherValues = new ContentValues();
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_LOC_KEY, locationRowId);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_DATE, currentTestDate);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_DEGREES, 1.1);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_HUMIDITY, 1.2 + 0.01 * i);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_PRESSURE, 1.3 - 0.01 * i);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP, 75 + i);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP, 65 - i);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC, "Asteroids");
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED, 5.5 + 0.2 * i);
+            weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, 321);
+
+            result[i] = weatherValues;
+            currentTestDate += millisecondsInADay;
+        }
+
+        return result;
+    }
+
+    public void testBulkInsert() {
+        ContentValues testValues = TestUtilities.createNorthPoleLocationValues();
+        Uri locationUri = mContext.getContentResolver().insert(WeatherContract.LocationEntry.CONTENT_URI, testValues);
+        long locationRowId = ContentUris.parseId(locationUri);
+
+        assertTrue(locationRowId != -1);
+
+        Cursor cursor = mContext.getContentResolver().query(
+                WeatherContract.LocationEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        TestUtilities.validateCursor("testBulkInsert. Error validating LocationEntry.", cursor, testValues);
+        ContentValues[] bulkInsertContentValues = createBulkInsertWeatherValues(locationRowId);
+
+        TestUtilities.TestContentObserver weatherObserver = TestUtilities.getTestContentObserver();
+        mContext.getContentResolver().registerContentObserver(WeatherContract.WeatherEntry.CONTENT_URI, true, weatherObserver);
+
+        int insertCount = mContext.getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, bulkInsertContentValues);
+        weatherObserver.waitForNotificationOrFail();
+        mContext.getContentResolver().unregisterContentObserver(weatherObserver);
+
+        assertEquals(insertCount, BULK_INSERT_RECORDS_TO_INSERT);
+
+        cursor = mContext.getContentResolver().query(
+                WeatherContract.WeatherEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                WeatherContract.WeatherEntry.COLUMN_DATE
+        );
+
+        assertEquals(cursor.getCount(), BULK_INSERT_RECORDS_TO_INSERT);
+        for (int i = 0; i < BULK_INSERT_RECORDS_TO_INSERT; i++) {
+            cursor.moveToNext();
+            TestUtilities.validateCurrentRecord("testBulkInsert. Error validating a WeatherEntry.", cursor, bulkInsertContentValues[i]);
+        }
+
+        cursor.close();
+
     }
 
 }

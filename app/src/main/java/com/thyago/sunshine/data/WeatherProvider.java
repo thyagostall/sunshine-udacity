@@ -176,7 +176,7 @@ public class WeatherProvider extends ContentProvider {
             case LOCATION:
                 long locationId = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, values);
                 if (locationId > 0) {
-                    result = WeatherContract.LocationEntry.buildWeatherUri(locationId);
+                    result = WeatherContract.LocationEntry.buildLocationUri(locationId);
                 } else {
                     throw new SQLException("Failed to insert row into " + uri);
                 }
@@ -200,12 +200,42 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsModified;
+
+        switch (match) {
+            case WEATHER:
+                rowsModified = db.delete(WeatherContract.WeatherEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case LOCATION:
+                rowsModified = db.delete(WeatherContract.LocationEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsModified;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsModified;
+
+        switch (match) {
+            case WEATHER:
+                rowsModified = db.update(WeatherContract.WeatherEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case LOCATION:
+                rowsModified = db.update(WeatherContract.LocationEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsModified;
     }
 
     @Override
