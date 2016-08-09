@@ -262,15 +262,15 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
             values.add(item);
         }
 
-        ContentValues[] convertedValues = new ContentValues[values.size()];
         if (values.size() > 0) {
+            ContentValues[] convertedValues = new ContentValues[values.size()];
             mContext.getContentResolver().bulkInsert(
                     WeatherContract.WeatherEntry.CONTENT_URI,
                     values.toArray(convertedValues));
         }
 
         String sortingOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationSetting, System.currentTimeMillis());
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(locationSetting, System.currentTimeMillis());
 
         Cursor cursor = mContext.getContentResolver().query(
                 weatherForLocationUri,
@@ -279,6 +279,7 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
                 null,
                 sortingOrder
         );
+
         values.clear();
         while (cursor.moveToNext()) {
             ContentValues item = new ContentValues();

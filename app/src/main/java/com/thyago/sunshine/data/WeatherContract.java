@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.text.format.Time;
 
 /**
  * Created by thyago on 8/1/16.
@@ -18,7 +19,10 @@ public class WeatherContract {
     public static final String PATH_LOCATION = LocationEntry.TABLE_NAME;
 
     public static long normalizeDate(long dateValue) {
-        return dateValue;
+        Time time = new Time();
+        time.set(dateValue);
+        int julianDay = Time.getJulianDay(dateValue, time.gmtoff);
+        return time.setJulianDay(julianDay);
     }
 
     public static final class LocationEntry implements BaseColumns {
@@ -86,9 +90,18 @@ public class WeatherContract {
         }
 
         public static Uri buildWeatherLocationWithDate(String location, long date) {
+            date = normalizeDate(date);
             return CONTENT_URI.buildUpon()
                     .appendPath(location)
                     .appendPath(String.valueOf(date))
+                    .build();
+        }
+
+        public static Uri buildWeatherLocationWithStartDate(String location, long startDate) {
+            startDate = normalizeDate(startDate);
+            return CONTENT_URI.buildUpon()
+                    .appendPath(location)
+                    .appendQueryParameter(COLUMN_DATE, Long.toString(startDate))
                     .build();
         }
     }

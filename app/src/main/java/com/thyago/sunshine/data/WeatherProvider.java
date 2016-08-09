@@ -226,6 +226,7 @@ public class WeatherProvider extends ContentProvider {
 
         switch (match) {
             case WEATHER:
+                normalizeDate(values);
                 rowsModified = db.update(WeatherContract.WeatherEntry.TABLE_NAME, values, selection, selectionArgs);
                 break;
             case LOCATION:
