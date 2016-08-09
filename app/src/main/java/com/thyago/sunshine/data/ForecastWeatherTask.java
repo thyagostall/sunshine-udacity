@@ -3,17 +3,12 @@ package com.thyago.sunshine.data;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.thyago.sunshine.Constants;
-import com.thyago.sunshine.R;
 import com.thyago.sunshine.SunshineApplication;
 
 import org.json.JSONArray;
@@ -26,25 +21,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Vector;
 
 /**
  * Created by thyago on 8/4/16.
  */
-public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
+public class ForecastWeatherTask extends AsyncTask<String, Void, Void> {
 
     private static final String LOG_TAG = ForecastWeatherTask.class.getSimpleName();
 
     private final Context mContext;
-    private final ArrayAdapter<String> mAdapter;
 
-    public ForecastWeatherTask(ArrayAdapter<String> adapter) {
+    public ForecastWeatherTask() {
         mContext = SunshineApplication.getSunshineContext();
-        mAdapter = adapter;
     }
 
     private String getAddLocationSelection() {
@@ -89,26 +80,8 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
         }
     }
 
-    String[] convertContentValuesToUXFormat(Vector<ContentValues> values) {
-        String[] result = new String[values.size()];
-        String unit = getPreferredUnit();
-
-        for (int i = 0; i < result.length; i++) {
-            ContentValues item = values.elementAt(i);
-            String highAndLow = formatHighLows(
-                    item.getAsDouble(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP),
-                    item.getAsDouble(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP),
-                    unit
-            );
-            result[i] = getReadableDateString(item.getAsLong(WeatherContract.WeatherEntry.COLUMN_DATE)) +
-                    " - " + item.getAsString(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC) +
-                    " - " + highAndLow;
-        }
-        return result;
-    }
-
     @Override
-    protected String[] doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
@@ -148,13 +121,12 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
             if (buffer.length() == 0) {
                 return null;
             }
-            return getWeatherDataFromJson(buffer.toString(), locationQuery);
+
+            getWeatherDataFromJson(buffer.toString(), locationQuery);
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getClass().getSimpleName(), e);
-            return null;
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
-            return null;
         } finally {
             if (urlConnection != null) urlConnection.disconnect();
 
@@ -166,16 +138,10 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
                 }
             }
         }
+        return null;
     }
 
-    @Override
-    protected void onPostExecute(String[] strings) {
-        mAdapter.clear();
-        mAdapter.addAll(strings);
-    }
-
-
-    private String[] getWeatherDataFromJson(String forecastJsonStr, String locationSetting) throws JSONException {
+    private void getWeatherDataFromJson(String forecastJsonStr, String locationSetting) throws JSONException {
         final String TAG_CITY = "city";
         final String TAG_CITY_NAME = "name";
         final String TAG_COORD = "coord";
@@ -213,7 +179,6 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
         Vector<ContentValues> values = new Vector<>(jWeathers.length());
 
         Date dayTime = new Date();
-        String unit = getPreferredUnit();
 
         for (int i = 0; i < jWeathers.length(); i++) {
             long dateTime;
@@ -268,63 +233,5 @@ public class ForecastWeatherTask extends AsyncTask<String, Void, String[]> {
                     WeatherContract.WeatherEntry.CONTENT_URI,
                     values.toArray(convertedValues));
         }
-
-        String sortingOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(locationSetting, System.currentTimeMillis());
-
-        Cursor cursor = mContext.getContentResolver().query(
-                weatherForLocationUri,
-                null,
-                null,
-                null,
-                sortingOrder
-        );
-
-        values.clear();
-        while (cursor.moveToNext()) {
-            ContentValues item = new ContentValues();
-            DatabaseUtils.cursorRowToContentValues(cursor, item);
-            values.add(item);
-        }
-
-        return convertContentValuesToUXFormat(values);
-    }
-
-
-    private String getReadableDateString(long time) {
-        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-        return shortenedDateFormat.format(time);
-    }
-
-    private double getMetric(double t) {
-        return t;
-    }
-
-    private double getImperial(double t) {
-        return (t * 1.8) + 32;
-    }
-
-    private String formatHighLows(double high, double low, String unit) {
-        if (getString(R.string.pref_value_metric).equals(unit)) {
-            high = getMetric(high);
-            low = getMetric(low);
-        } else {
-            high = getImperial(high);
-            low = getImperial(low);
-        }
-
-        long roundedHigh = Math.round(high);
-        long roundedLow = Math.round(low);
-
-        return String.format(Locale.getDefault(), "%d/%d", roundedHigh, roundedLow);
-    }
-
-    private String getPreferredUnit() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        return prefs.getString(getString(R.string.pref_key_unit), getString(R.string.pref_value_metric));
-    }
-
-    private String getString(int id) {
-        return mContext.getString(id);
     }
 }
