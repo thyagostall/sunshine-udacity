@@ -21,6 +21,29 @@ import java.util.Locale;
  */
 public class ForecastAdapter extends CursorAdapter {
 
+
+    static final String[] FORECAST_COLUMNS = {
+            WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
+            WeatherContract.WeatherEntry.COLUMN_DATE,
+            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
+            WeatherContract.LocationEntry.COLUMN_COORD_LAT,
+            WeatherContract.LocationEntry.COLUMN_COORD_LONG
+    };
+
+    static final int COL_WEATHER_ID = 0;
+    static final int COL_WEATHER_DATE = 1;
+    static final int COL_WEATHER_DESC = 2;
+    static final int COL_WEATHER_MAX_TEMP = 3;
+    static final int COL_WEATHER_MIN_TEMP = 4;
+    static final int COL_LOCATION_SETTING = 5;
+    static final int COL_WEATHER_CONDITION_ID = 6;
+    static final int COL_COORD_LAT = 7;
+    static final int COL_COORD_LONG = 8;
+
     private Context mContext;
 
     public ForecastAdapter(Context context, Cursor c, int flags) {
@@ -70,12 +93,12 @@ public class ForecastAdapter extends CursorAdapter {
         String result;
 
         String highAndLow = formatHighLows(
-                cursor.getDouble(cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP)),
-                cursor.getDouble(cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP)),
+                cursor.getDouble(COL_WEATHER_MAX_TEMP),
+                cursor.getDouble(COL_WEATHER_MIN_TEMP),
                 unit
         );
-        result = getReadableDateString(cursor.getLong(cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATE))) +
-                " - " + cursor.getString(cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC)) +
+        result = getReadableDateString(cursor.getLong(COL_WEATHER_DATE)) +
+                " - " + cursor.getString(COL_WEATHER_DESC) +
                 " - " + highAndLow;
         return result;
     }

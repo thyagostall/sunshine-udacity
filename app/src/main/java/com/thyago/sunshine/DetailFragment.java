@@ -32,7 +32,7 @@ public class DetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        String temperature = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
+        String temperature = getActivity().getIntent().getDataString();
         mDetailTextView = (TextView) view.findViewById(R.id.detail_textview);
         mDetailTextView.setText(temperature);
 
