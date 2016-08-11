@@ -1,6 +1,11 @@
 package com.thyago.sunshine;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -17,9 +22,11 @@ import android.widget.TextView;
 /**
  * Created by thyago on 7/27/16.
  */
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final int FORECAST_DETAIL_LOADER = 0x1;
 
     private TextView mDetailTextView;
+    private Uri mDataUri;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,13 +35,18 @@ public class DetailFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(FORECAST_DETAIL_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        String temperature = getActivity().getIntent().getDataString();
+        mDataUri = getActivity().getIntent().getData();
         mDetailTextView = (TextView) view.findViewById(R.id.detail_textview);
-        mDetailTextView.setText(temperature);
 
         return view;
     }
@@ -65,4 +77,19 @@ public class DetailFragment extends Fragment {
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(), mDataUri, ForecastAdapter.FORECAST_COLUMNS, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        data.moveToFirst();
+        mDetailTextView.setText(data.getString(ForecastAdapter.COL_WEATHER_DESC));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
 }

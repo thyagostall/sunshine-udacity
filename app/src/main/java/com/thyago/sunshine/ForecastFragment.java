@@ -26,7 +26,7 @@ import com.thyago.sunshine.preferences.SunshinePrefs;
  * Created by thyago on 7/25/16.
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final int FORECAST_LOADER = 0;
+    private static final int FORECAST_LOADER = 0x0;
 
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     private ForecastAdapter mAdapter;
