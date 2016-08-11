@@ -27,6 +27,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private TextView mDetailTextView;
     private Uri mDataUri;
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,8 +57,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         inflater.inflate(R.menu.detail_fragment_menu, menu);
 
         MenuItem item = menu.findItem(R.id.action_share);
-        ShareActionProvider actionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-        actionProvider.setShareIntent(buildShareIntent());
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        mShareActionProvider.setShareIntent(buildShareIntent());
     }
 
     @SuppressWarnings("deprecation")
@@ -76,7 +77,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         return shareIntent;
     }
 
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(), mDataUri, ForecastAdapter.FORECAST_COLUMNS, null, null, null);
@@ -86,6 +86,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         data.moveToFirst();
         mDetailTextView.setText(data.getString(ForecastAdapter.COL_WEATHER_DESC));
+        mShareActionProvider.setShareIntent(buildShareIntent());
     }
 
     @Override

@@ -13,16 +13,32 @@ import com.thyago.sunshine.preferences.SunshinePrefs;
 public class ForecastActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = ForecastActivity.class.getSimpleName();
+    private static final String FORECAST_FRAGMENT_TAG = ForecastFragment.class.getName();
+
+    private String mLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
+
+        mLocation = SunshinePrefs.getPreferredLocation();
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment())
+                    .add(R.id.container, new ForecastFragment(), FORECAST_FRAGMENT_TAG)
                     .commit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mLocation.equals(SunshinePrefs.getPreferredLocation())) {
+            return;
+        }
+        ForecastFragment fragment = (ForecastFragment) getFragmentManager().findFragmentByTag(FORECAST_FRAGMENT_TAG);
+        fragment.onLocationChanged();
     }
 
     @Override
