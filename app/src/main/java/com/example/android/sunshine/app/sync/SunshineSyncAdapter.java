@@ -39,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -72,12 +73,13 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int INDEX_SHORT_DESC = 3;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID, LOCATION_STATUS_UNKNOWN})
+    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID, LOCATION_STATUS_UNKNOWN, LOCATION_STATUS_INVALID_LOCATION})
     public @interface LocationStatus {}
     public static final int LOCATION_STATUS_OK = 0;
     public static final int LOCATION_STATUS_SERVER_DOWN = 1;
     public static final int LOCATION_STATUS_SERVER_INVALID = 2;
     public static final int LOCATION_STATUS_UNKNOWN = 3;
+    public static final int LOCATION_STATUS_INVALID_LOCATION = 4;
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -150,11 +152,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             }
             forecastJsonStr = buffer.toString();
             getWeatherDataFromJson(forecastJsonStr, locationQuery);
+        } catch (FileNotFoundException e) {
+            Log.d(LOG_TAG, "FileNotFoundException: " + e.getClass());
+            setLocationStatus(getContext(), LOCATION_STATUS_INVALID_LOCATION);
         } catch (IOException e) {
-            Log.d(LOG_TAG, "IOException");
+            Log.d(LOG_TAG, "IOException: " + e.getClass());
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_DOWN);
         } catch (JSONException e) {
-            Log.d(LOG_TAG, "JSONException");
+            Log.d(LOG_TAG, "JSONException: " + e.getClass());
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_INVALID);
         } finally {
             if (urlConnection != null) {
@@ -546,7 +551,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
 
-        editor.putInt(context.getString(R.string.pref_location_status), locationStatus);
+        editor.putInt(context.getString(R.string.pref_location_status_key), locationStatus);
         editor.commit();
     }
 }

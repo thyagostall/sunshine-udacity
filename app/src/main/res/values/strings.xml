@@ -111,9 +111,12 @@
 
     <string name="empty_forecast_list">No weather information available.</string>
     <string name="empty_forecast_list_no_internet_connection">No weather information available. No internet connection.</string>
-
-    <string name="pref_location_status">location_status</string>
     <string name="empty_forecast_list_invalid_response">No weather information available. The data received is not valid. Check for updates.</string>
     <string name="empty_forecast_list_server_down">No weather information available. There is a problem with the weather server.</string>
+    <string name="empty_forecast_list_invalid_location">No weather information available. The location input is invalid.</string>
+
+    <string name="pref_location_status_key">location_status</string>
+    <string name="pref_location_error_invalid_location">Invalid Location (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
+    <string name="pref_location_error_unknown">Validating Location… (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
 
 </resources>

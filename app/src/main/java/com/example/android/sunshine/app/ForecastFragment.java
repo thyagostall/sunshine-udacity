@@ -125,7 +125,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.d(LOG_TAG, "Preference changed: " + key);
-        if (key.equals(getString(R.string.pref_location_status))) {
+        if (key.equals(getString(R.string.pref_location_status_key))) {
             updateEmptyView();
         }
     }
@@ -278,9 +278,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             mListView.smoothScrollToPosition(mPosition);
         }
 
-        if (mForecastAdapter.getCount() == 0 && !Utility.isOnline(getActivity())) {
-            updateEmptyView();
-        }
+        updateEmptyView();
     }
 
     @Override
@@ -305,6 +303,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     break;
                 case SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID:
                     message = R.string.empty_forecast_list_invalid_response;
+                    break;
+                case SunshineSyncAdapter.LOCATION_STATUS_INVALID_LOCATION:
+                    message = R.string.empty_forecast_list_invalid_location;
                     break;
                 default:
                     if (!Utility.isOnline(getActivity())) {
