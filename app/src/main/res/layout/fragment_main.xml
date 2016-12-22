@@ -27,7 +27,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/no_weather_information"
+        android:padding="16dp"
+        android:text="@string/empty_forecast_list"
         android:textAppearance="?android:textAppearanceLarge"
         android:gravity="center"
         android:id="@+id/empty_view" />

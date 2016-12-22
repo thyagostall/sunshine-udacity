@@ -20,7 +20,10 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.text.format.Time;
+
+import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -253,5 +256,11 @@ public class Utility {
             return R.drawable.art_clouds;
         }
         return -1;
+    }
+
+    @SuppressWarnings("WrongConstant")
+    public static @SunshineSyncAdapter.LocationStatus int getLocationStatus(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getInt(context.getString(R.string.pref_location_status), SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
     }
 }
