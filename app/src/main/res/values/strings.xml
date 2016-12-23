@@ -192,6 +192,6 @@
     <string name="pref_art_pack_label_sunshine">Sunshine</string>
     <string name="pref_art_pack_label_cute_dogs">Cute dogs</string>
 
-    <string name="pref_art_pack_sunshine" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-xxhdpi/art_%s.png</string>
-    <string name="pref_art_pack_cute_dogs" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-mdpi/art_%s.png</string>
+    <string name="pref_art_pack_sunshine" translatable="false">https://github.com/udacity/sunshine_icons/raw/master/Archive/Colored/art_%s.png</string>
+    <string name="pref_art_pack_cute_dogs" translatable="false">https://github.com/udacity/sunshine_icons/raw/master/Archive/Mono/art_%s.png</string>
 </resources>
