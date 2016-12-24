@@ -45,15 +45,10 @@ public class MyGcmListenerService extends GcmListenerService {
             return;
         }
 
-        try {
-            JSONObject jObject = new JSONObject(data.getString(EXTRA_DATA));
-            String weather = jObject.getString(EXTRA_WEATHER);
-            String location = jObject.getString(EXTRA_LOCATION);
-            String alert = String.format(getString(R.string.gcm_weather_alert), weather, location);
-            sendNotificationMessage(alert);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        String weather = data.getString(EXTRA_WEATHER);
+        String location = data.getString(EXTRA_LOCATION);
+        String alert = String.format(getString(R.string.gcm_weather_alert), weather, location);
+        sendNotificationMessage(alert);
     }
 
     private void sendNotificationMessage(String message) {
