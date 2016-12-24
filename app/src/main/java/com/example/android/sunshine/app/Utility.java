@@ -473,4 +473,15 @@ public class Utility {
         editor.putInt(context.getString(R.string.pref_location_status_key), SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
         editor.apply();
     }
+
+    public static boolean isUsingLocalGraphics(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String defaultArtPack = context.getString(R.string.pref_art_pack_sunshine);
+        return preferences.getString(context.getString(R.string.pref_art_pack_key), defaultArtPack).equals(defaultArtPack);
+    }
+
+    public static String getFullFriendlyDayString(Context context, long dateInMillis) {
+        String day = getDayName(context, dateInMillis);
+        return context.getString(R.string.format_full_friendly_date, day, getFormattedMonthDay(context, dateInMillis));
+    }
 }
