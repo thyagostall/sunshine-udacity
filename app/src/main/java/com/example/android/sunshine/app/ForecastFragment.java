@@ -186,13 +186,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         final View parallaxView = rootView.findViewById(R.id.parallax_bar);
         if (null != parallaxView) {
+            mRecyclerView.bringToFront();
+            mRecyclerView.requestLayout();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                     @Override
                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                         super.onScrolled(recyclerView, dx, dy);
-                        int max = parallaxView.getHeight();
+                        int max = (int) (parallaxView.getHeight() * 1.2);
                         if (dy > 0) {
                             parallaxView.setTranslationY(Math.max(-max, parallaxView.getTranslationY() - dy / 2));
                         } else {
