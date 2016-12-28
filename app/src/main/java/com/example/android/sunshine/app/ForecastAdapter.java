@@ -17,6 +17,7 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     private final Context mContext;
     private final ForecastAdapterOnClickHandler mClickHandler;
     private final View mEmptyView;
+    private final ItemChoiceManager mICM;
 
     private Cursor mCursor;
 
@@ -78,10 +80,12 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         void onClick(Long date, ForecastAdapterViewHolder viewHolder);
     }
 
-    public ForecastAdapter(Context context, ForecastAdapterOnClickHandler clickHandler, View emptyView) {
+    public ForecastAdapter(Context context, ForecastAdapterOnClickHandler clickHandler, View emptyView, int choiceMode) {
         mContext = context;
         mEmptyView = emptyView;
         mClickHandler = clickHandler;
+        mICM = new ItemChoiceManager(this);
+        mICM.setChoiceMode(choiceMode);
     }
 
     public void setUseTodayLayout(boolean useTodayLayout) {
@@ -163,6 +167,20 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         String low = Utility.formatTemperature(mContext, mCursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP));
         viewHolder.mLowTempView.setText(low);
         viewHolder.mLowTempView.setContentDescription(mContext.getString(R.string.a11y_low_temp, low));
+
+        mICM.onBindViewHolder(viewHolder, position);
+    }
+
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        mICM.onRestoreInstanceState(savedInstanceState);
+    }
+
+    public void onSaveInstanceState(Bundle outState) {
+        mICM.onSaveInstanceState(outState);
+    }
+
+    public int getSelectedItemPosition() {
+        return mICM.getSelectedItemPosition();
     }
 
     @Override
@@ -183,5 +201,12 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
 
     public Cursor getCursor() {
         return mCursor;
+    }
+
+    public void selectView(RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof ForecastAdapterViewHolder) {
+            ForecastAdapterViewHolder forecastAdapterViewHolder = (ForecastAdapterViewHolder) viewHolder;
+            forecastAdapterViewHolder.onClick(forecastAdapterViewHolder.itemView);
+        }
     }
 }
