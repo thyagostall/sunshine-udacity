@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Utility {
+    public static float DEFAULT_LATLONG = 0F;
+
     public static boolean isOnline(Context context) {
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
@@ -483,5 +485,20 @@ public class Utility {
     public static String getFullFriendlyDayString(Context context, long dateInMillis) {
         String day = getDayName(context, dateInMillis);
         return context.getString(R.string.format_full_friendly_date, day, getFormattedMonthDay(context, dateInMillis));
+    }
+
+    public static boolean isLocationLatLonAvailable(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.contains(context.getString(R.string.pref_location_lat_key)) && preferences.contains(context.getString(R.string.pref_location_lon_key));
+    }
+
+    public static float getLocationLatitude(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getFloat(context.getString(R.string.pref_location_lat_key), DEFAULT_LATLONG);
+    }
+
+    public static float getLocationLongitude(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getFloat(context.getString(R.string.pref_location_lon_key), DEFAULT_LATLONG);
     }
 }

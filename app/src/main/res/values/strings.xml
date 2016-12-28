@@ -206,4 +206,7 @@
 
     <string name="detail_icon_transition_name" translatable="false">transition_name_detail_icon</string>
     <string name="pref_current_location_desc">Use My Location</string>
+
+    <string name="pref_location_lat_key" translatable="false">loc-lat</string>
+    <string name="pref_location_lon_key" translatable="false">loc-lon</string>
 </resources>
