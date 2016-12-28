@@ -12,10 +12,15 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.android.sunshine.app.R;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 /**
  * Created by thyago on 22/12/2016.
@@ -39,6 +44,25 @@ public class LocationEditTextPreference extends EditTextPreference {
         } finally {
             a.recycle();
         }
+
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(context);
+        if (resultCode == ConnectionResult.SUCCESS) {
+            setWidgetLayoutResource(R.layout.pref_current_location);
+        }
+    }
+
+    @Override
+    protected View onCreateView(ViewGroup parent) {
+        View view =  super.onCreateView(parent);
+        View currentLocation = view.findViewById(R.id.current_location);
+        currentLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "I got it!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        return view;
     }
 
     @Override
