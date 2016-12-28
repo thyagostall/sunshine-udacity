@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:elevation="0dp">
+            android:elevation="0dp">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -46,8 +46,7 @@
                     android:layout_gravity="center_horizontal"
                     android:scaleType="center"
                     android:src="@drawable/ic_logo"
-                    android:contentDescription="@string/app_name"
-                    app:layout_scrollFlags="scroll|enterAlwaysCollapsed" />
+                    android:contentDescription="@string/app_name"/>
 
             </android.support.v7.widget.Toolbar>
 
