@@ -7,4 +7,5 @@
     android:minResizeHeight="@dimen/widget_today_min_resize_height"
     android:minResizeWidth="@dimen/widget_today_min_resize_width"
     android:previewImage="@drawable/widget_preview_today"
+    android:resizeMode="horizontal"
     android:updatePeriodMillis="0" />

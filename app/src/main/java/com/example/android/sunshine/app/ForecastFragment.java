@@ -63,6 +63,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private boolean mHoldForTransition;
     private boolean mAutoSelectView;
     private int mChoiceMode;
+    private long mInitialSelectedDate = -1;
 
     private static final String SELECTED_KEY = "selected_position";
 
@@ -196,6 +197,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                         .onItemSelected(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
                                 locationSetting, date
                         ), viewHolder);
+                mPosition = viewHolder.getAdapterPosition();
             }
         }, mEmptyView, mChoiceMode);
 
@@ -244,8 +246,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             }
         }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        if (savedInstanceState != null) {
+            mForecastAdapter.onRestoreInstanceState(savedInstanceState);
         }
 
         mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
@@ -294,9 +296,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (mPosition != RecyclerView.NO_POSITION) {
-            outState.putInt(SELECTED_KEY, mPosition);
-        }
+        mForecastAdapter.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
 
@@ -326,9 +326,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
-        if (mPosition != RecyclerView.NO_POSITION) {
-            mRecyclerView.smoothScrollToPosition(mPosition);
-        }
 
         updateEmptyView();
 
@@ -340,12 +337,25 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 public boolean onPreDraw() {
                     if (mRecyclerView.getChildCount() > 0) {
                         mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        int itemPosition = mForecastAdapter.getSelectedItemPosition();
-                        if (RecyclerView.NO_POSITION == itemPosition) {
-                            itemPosition = 0;
+                        int position = mForecastAdapter.getSelectedItemPosition();
+                        if (position == RecyclerView.NO_POSITION && mInitialSelectedDate != -1) {
+                            Cursor data = mForecastAdapter.getCursor();
+                            int count = data.getCount();
+                            int dateColumn = data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATE);
+                            for (int i = 0; i < count; i++) {
+                                data.moveToPosition(i);
+                                if (data.getLong(dateColumn) == mInitialSelectedDate) {
+                                    position = i;
+                                    break;
+                                }
+                            }
                         }
-                        RecyclerView.ViewHolder viewHolder = mRecyclerView.findViewHolderForAdapterPosition(itemPosition);
-                        if (null != viewHolder && mAutoSelectView) {
+                        if (position == RecyclerView.NO_POSITION) {
+                            position = 0;
+                        }
+                        mRecyclerView.smoothScrollToPosition(position);
+                        RecyclerView.ViewHolder viewHolder = mRecyclerView.findViewHolderForAdapterPosition(position);
+                        if (mAutoSelectView && viewHolder != null) {
                             mForecastAdapter.selectView(viewHolder);
                         }
                         if (mHoldForTransition) {
@@ -392,5 +402,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             }
             mEmptyView.setText(message);
         }
+    }
+
+    public void setInitialSelectedDate(long initialDateSelected) {
+        mInitialSelectedDate = initialDateSelected;
     }
 }
